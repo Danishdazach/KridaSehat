@@ -15,17 +15,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       'title': 'Selamat Datang di RocketApp',
       'desc': 'Aplikasi yang membantu memantau kebersihan dan kedisiplinan kelas.',
-      'image': 'board/logo.png',
+      'image': 'assets/board/board1.png',
     },
     {
       'title': 'Scan QR dan Dapatkan Poin',
       'desc': 'Scan area bersih, matikan lampu & AC, dan kumpulkan poin kelasmu!',
-      'image': 'board/logo2.jpeg',
+      'image': 'assets/board/board2.jpeg',
     },
     {
       'title': 'Tukar Poin & Menangkan Hadiah',
       'desc': 'Poin bisa ditukar dengan hadiah dan badge eksklusif!',
-      'image': 'board/logo.png',
+      'image': 'assets/board/board3.png',
     },
   ];
 

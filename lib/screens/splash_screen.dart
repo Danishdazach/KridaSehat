@@ -14,9 +14,9 @@ class SplashScreen extends StatefulWidget {
 
   const SplashScreen({
     super.key,
-    this.logoAsset = 'images/board.png',
-    this.appName = 'RocketApp',
-    this.createdBy = 'YourName',
+    this.logoAsset = 'assets/images/logo.png',
+    this.appName = 'KridaSehat',
+    this.createdBy = 'Dazach',
     this.primaryColor = const Color(0xFF6E7E40),
     this.textColor = const Color(0xFF6E7E40),
     this.animationDuration = const Duration(milliseconds: 3000), // diperpanjang

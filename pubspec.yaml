@@ -77,7 +77,8 @@ flutter:
   #         weight: 700
 
   assets:
-    - images/
+    - assets/images/
+    - assets/board/
 
   #
   # For details regarding fonts from package dependencies,
