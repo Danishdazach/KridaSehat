@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           IconButton(
             icon: const Icon(Icons.arrow_back, color: primaryColor),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pushReplacementNamed(context, '/boarding');
             },
           ),
         ],
