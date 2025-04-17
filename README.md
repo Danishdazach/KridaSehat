@@ -1,16 +1,39 @@
-# kridasehat
+# KridaSehat
 
-A new Flutter project.
+**KridaSehat** adalah aplikasi berbasis mobile/web yang dirancang untuk membantu siswa dan sekolah dalam membangun kebiasaan hidup bersih dan sehat melalui sistem pemantauan kebersihan kelas, pelaporan, dan sistem poin reward.
 
-## Getting Started
+![KridaSehat Logo](link-ke-logo.png)
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## Fitur Unggulan
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Login Aman** dengan NISN dan sandi dari sekolah
+- **Pemantauan Kebersihan** menggunakan upload foto dan scan QR
+- **Poin dan Reward** untuk kelas paling disiplin
+- **Leaderboard Kelas** untuk meningkatkan motivasi
+- **Laporan Mingguan** untuk guru wali kelas
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## Tampilan Aplikasi
+
+![Tampilan Aplikasi](link-ke-screenshot.png)
+
+---
+
+## Teknologi yang Digunakan
+
+![HTML](https://img.shields.io/badge/HTML-5-orange)
+![CSS](https://img.shields.io/badge/CSS-3-blue)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow)
+![PHP](https://img.shields.io/badge/PHP-8.1-purple)
+![MySQL](https://img.shields.io/badge/Database-MySQL-lightgrey)
+
+---
+
+## Instalasi Lokal
+
+```bash
+git clone https://github.com/danishdazach/KridaSehat.git
+cd KridaSehat
