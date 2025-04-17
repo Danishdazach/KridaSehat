@@ -2,7 +2,7 @@
 
 **KridaSehat** adalah aplikasi berbasis mobile/web yang dirancang untuk membantu siswa dan sekolah dalam membangun kebiasaan hidup bersih dan sehat melalui sistem pemantauan kebersihan kelas, pelaporan, dan sistem poin reward.
 
-![KridaSehat Logo](link-ke-logo.png)
+![KridaSehat Logo](images/logo.png)
 
 ---
 
