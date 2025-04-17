@@ -1,222 +1,256 @@
 import 'package:flutter/material.dart';
-import 'package:kridasehat/screens/landing_page.dart';
+import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final String logoAsset;
+  final String appName;
+  final String createdBy;
+  final Color primaryColor;
+  final Color textColor;
+  final Duration animationDuration;
+  final Duration splashDuration;
+  final String nextRoute;
+  final double logoSize;
+
+  const SplashScreen({
+    super.key,
+    this.logoAsset = 'images/board.png',
+    this.appName = 'RocketApp',
+    this.createdBy = 'YourName',
+    this.primaryColor = const Color(0xFF6E7E40),
+    this.textColor = const Color(0xFF6E7E40),
+    this.animationDuration = const Duration(milliseconds: 3000), // diperpanjang
+    this.splashDuration = const Duration(seconds: 5),            // diperpanjang
+    this.nextRoute = '/boarding',
+    this.logoSize = 150,
+  });
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
-  // Menggunakan multiple animation controllers untuk efek yang lebih kompleks
-  late AnimationController _scaleController;
-  late AnimationController _rotateController;
-  late AnimationController _fadeController;
-  late AnimationController _slideController;
-  
-  // Animations
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _rotateAnimation;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-  late Animation<Color?> _colorAnimation;
-  
+  late AnimationController _logoAnimationController;
+  late AnimationController _textAnimationController;
+  late Animation<double> _logoScaleAnimation;
+  late Animation<double> _logoRotateAnimation;
+  late Animation<double> _titleFadeAnimation;
+  late Animation<double> _subtitleFadeAnimation;
+  late Animation<Offset> _titleSlideAnimation;
+  late Animation<Offset> _subtitleSlideAnimation;
+
   @override
   void initState() {
     super.initState();
 
-    // Scale animation controller
-    _scaleController = AnimationController(
-      vsync: this, 
-      duration: const Duration(milliseconds: 800),
-    );
-    
-    // Rotate animation controller with different timing
-    _rotateController = AnimationController(
-      vsync: this, 
-      duration: const Duration(milliseconds: 1200),
-    );
-    
-    // Fade animation controller
-    _fadeController = AnimationController(
-      vsync: this, 
-      duration: const Duration(milliseconds: 1500),
-    );
-    
-    // Slide animation controller
-    _slideController = AnimationController(
-      vsync: this, 
-      duration: const Duration(milliseconds: 1000),
+    _logoAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: widget.animationDuration.inMilliseconds),
     );
 
-    // Scale animation with bounce effect
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
+    _textAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: widget.animationDuration.inMilliseconds),
     );
 
-    // Rotate animation with easeOut curve
-    _rotateAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _rotateController, curve: Curves.easeOutBack),
+    _logoScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _logoAnimationController,
+        curve: Curves.elasticOut,
+      ),
     );
-    
-    // Fade animation
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
+
+    _logoRotateAnimation = Tween<double>(begin: 0.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _logoAnimationController,
+        curve: Curves.easeOut,
+      ),
     );
-    
-    // Slide animation with ease out curve
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.5), 
-      end: Offset.zero
+
+    _titleFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _textAnimationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+      ),
+    );
+
+    _titleSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 0.5),
+      end: Offset.zero,
     ).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+      CurvedAnimation(
+        parent: _textAnimationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
     );
-    
-    // Color animation for background
-    _colorAnimation = ColorTween(
-      begin: Colors.deepPurple.shade900,
-      end: Colors.deepPurple,
+
+    _subtitleFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _textAnimationController,
+        curve: const Interval(0.4, 1.0, curve: Curves.easeIn),
+      ),
+    );
+
+    _subtitleSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 1.0),
+      end: Offset.zero,
     ).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
+      CurvedAnimation(
+        parent: _textAnimationController,
+        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+      ),
     );
 
-    // Start animations in sequence
-    _scaleController.forward();
-    
-    Future.delayed(const Duration(milliseconds: 200), () {
-      _rotateController.forward();
-    });
-    
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _fadeController.forward();
-    });
-    
-    Future.delayed(const Duration(milliseconds: 500), () {
-      _slideController.forward();
-    });
+    _logoAnimationController.forward();
 
-    // Navigate to landing page after animation completes
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const LandingPage(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              var begin = 0.0;
-              var end = 1.0;
-              var curve = Curves.easeInOut;
-              
-              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-              return FadeTransition(opacity: animation.drive(tween), child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 800),
-          ),
-        );
-      }
+    Future.delayed(
+      const Duration(milliseconds: 1000),
+      () => _textAnimationController.forward(),
+    );
+
+    Timer(widget.splashDuration, () {
+      Navigator.pushReplacementNamed(context, widget.nextRoute);
     });
   }
 
   @override
   void dispose() {
-    _scaleController.dispose();
-    _rotateController.dispose();
-    _fadeController.dispose();
-    _slideController.dispose();
+    _logoAnimationController.dispose();
+    _textAnimationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _fadeController,
-      builder: (context, child) {
-        return Scaffold(
-          backgroundColor: _colorAnimation.value,
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo animasi
-                AnimatedBuilder(
-                  animation: _scaleController,
-                  builder: (context, child) {
-                    return Transform.rotate(
-                      angle: _rotateAnimation.value * 2.0 * 3.14159,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white,
+              widget.primaryColor.withOpacity(0.1),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const Spacer(flex: 2),
+
+              AnimatedBuilder(
+                animation: _logoAnimationController,
+                builder: (context, child) {
+                  return Center(
+                    child: Transform.rotate(
+                      angle: _logoRotateAnimation.value,
                       child: Transform.scale(
-                        scale: _scaleAnimation.value,
+                        scale: _logoScaleAnimation.value,
                         child: Container(
-                          height: 120,
-                          width: 120,
+                          width: widget.logoSize,
+                          height: widget.logoSize,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.white.withOpacity(0.3),
-                                blurRadius: 20,
+                                color: widget.primaryColor.withOpacity(0.3),
+                                blurRadius: 15,
                                 spreadRadius: 5,
                               ),
                             ],
                           ),
-                          child: const FlutterLogo(size: 100),
+                          child: Image.asset(
+                            widget.logoAsset,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                ),
-                
-                const SizedBox(height: 40),
-                
-                // Text dengan animasi fade dan slide
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Kridasehat',
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 40),
+
+              AnimatedBuilder(
+                animation: _textAnimationController,
+                builder: (context, child) {
+                  return SlideTransition(
+                    position: _titleSlideAnimation,
+                    child: FadeTransition(
+                      opacity: _titleFadeAnimation,
+                      child: Text(
+                        widget.appName,
+                        style: TextStyle(
+                          fontSize: 38,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Sora',
+                          color: widget.textColor,
+                          letterSpacing: 1.5,
+                          shadows: [
+                            Shadow(
+                              color: widget.primaryColor.withOpacity(0.3),
+                              blurRadius: 2,
+                              offset: const Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 15),
+
+              AnimatedBuilder(
+                animation: _textAnimationController,
+                builder: (context, child) {
+                  return FadeTransition(
+                    opacity: _subtitleFadeAnimation,
+                    child: Text(
+                      'v1.0.0',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'Sora',
+                        color: widget.textColor.withOpacity(0.5),
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              const Spacer(flex: 2),
+
+              AnimatedBuilder(
+                animation: _textAnimationController,
+                builder: (context, child) {
+                  return SlideTransition(
+                    position: _subtitleSlideAnimation,
+                    child: FadeTransition(
+                      opacity: _subtitleFadeAnimation,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 24.0),
+                        child: Text(
+                          'Dibuat oleh ${widget.createdBy}',
                           style: TextStyle(
-                            fontSize: 32,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Sora',
+                            color: widget.textColor.withOpacity(0.7),
+                            letterSpacing: 0.5,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Sehat Selalu Bersama Kami',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white.withOpacity(0.8),
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                
-                const SizedBox(height: 50),
-                
-                // Indikator loading
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: const SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 3,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                  );
+                },
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

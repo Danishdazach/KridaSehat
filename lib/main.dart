@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
+import 'screens/login_page.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/landing_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,17 +10,20 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kridasehat',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const SplashScreen(),
+      title: 'Simple Flutter Login',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.blue),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/boarding': (context) => const OnboardingScreen(),
+        '/login': (context) => const LoginPage(),
+        '/landing': (context) => const LandingPage(),
+      },
     );
   }
 }
