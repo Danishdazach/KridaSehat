@@ -18,17 +18,7 @@
 
 ## Tampilan Aplikasi
 
-![Tampilan Aplikasi](link-ke-screenshot.png)
-
----
-
-## Teknologi yang Digunakan
-
-![HTML](https://img.shields.io/badge/HTML-5-orange)
-![CSS](https://img.shields.io/badge/CSS-3-blue)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow)
-![PHP](https://img.shields.io/badge/PHP-8.1-purple)
-![MySQL](https://img.shields.io/badge/Database-MySQL-lightgrey)
+![Tampilan Aplikasi](https://drive.google.com/file/d/1p4phgMal5qNHPoqA1Zd-VXDX0oX1Z1KD/view?usp=drive_link)
 
 ---
 
