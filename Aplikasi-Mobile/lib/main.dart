@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_page.dart';
+import 'screens/lupa_password.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/landing_page.dart';
 
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/boarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginPage(),
+        '/forgot-password': (context) => const ForgotPasswordPage(),
         '/landing': (context) => const LandingPage(),
       },
     );
