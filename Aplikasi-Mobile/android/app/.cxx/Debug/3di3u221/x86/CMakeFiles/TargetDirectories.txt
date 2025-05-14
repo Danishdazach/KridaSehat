@@ -1,0 +1,2 @@
+C:/Users/danis/OneDrive/Documents/GitHub/KridaSehat/Aplikasi-Mobile/android/app/.cxx/Debug/3di3u221/x86/CMakeFiles/edit_cache.dir
+C:/Users/danis/OneDrive/Documents/GitHub/KridaSehat/Aplikasi-Mobile/android/app/.cxx/Debug/3di3u221/x86/CMakeFiles/rebuild_cache.dir
