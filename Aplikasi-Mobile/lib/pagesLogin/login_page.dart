@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kridasehat/pagesLogin/daftar_page.dart';
 import 'package:kridasehat/pagesLogin/lupa_password_page.dart';
-
+// Import AppLogo widget
+import 'package:kridasehat/logobar/app_logo.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -365,17 +366,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          _buildLogo(),
-          const SizedBox(width: 10),
-          const Text(
-            'KridaSehat',
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: primaryColor,
-            ),
-          ),
+          // Menggunakan AppLogo widget baru yang konsisten
+          const AppLogo(),
           const Spacer(),
           Container(
             decoration: BoxDecoration(
@@ -398,37 +390,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Hero(
-        tag: 'app_logo',
-        child: Image.asset(
-          'assets/images/logo.png',
-          width: 32,
-          height: 32,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => const Icon(
-            Icons.rocket_launch,
-            color: primaryColor,
-            size: 24,
-          ),
-        ),
       ),
     );
   }

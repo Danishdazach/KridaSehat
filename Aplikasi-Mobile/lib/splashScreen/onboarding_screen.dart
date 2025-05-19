@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kridasehat/logobar/app_logo.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -288,110 +289,72 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-      child: Row(
-        children: [
-          _buildLogo(),
-          const SizedBox(width: 12),
-          const Text(
-            'KridaSehat',
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: primaryColor,
-              letterSpacing: 0.5,
-            ),
-          ),
-          const Spacer(),
-          AnimatedOpacity(
-            opacity: 1.0,
-            duration: const Duration(milliseconds: 300),
-            child: _currentPage != onboardingData.length - 1
-                ? TextButton(
-                    onPressed: _skipToEnd,
-                    style: TextButton.styleFrom(
-                      foregroundColor: accentColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Lewati',
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: accentColor.withOpacity(0.9),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.skip_next, 
-                          size: 16, 
-                          color: accentColor.withOpacity(0.9),
-                        ),
-                      ],
-                    ),
-                  )
-                : Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: highlightColor.withOpacity(0.15),
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+    child: Row(
+      children: [
+        // Use the reusable AppLogo widget with standard size
+        const AppLogo(),
+        const Spacer(),
+        AnimatedOpacity(
+          opacity: 1.0,
+          duration: const Duration(milliseconds: 300),
+          child: _currentPage != onboardingData.length - 1
+              ? TextButton(
+                  onPressed: _skipToEnd,
+                  style: TextButton.styleFrom(
+                    foregroundColor: accentColor,
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Terakhir',
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: highlightColor,
-                          ),
-                        ),
-                        SizedBox(width: 4),
-                        Icon(Icons.check_circle_outline, size: 16, color: highlightColor),
-                      ],
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Lewati',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: accentColor.withOpacity(0.9),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.skip_next, 
+                        size: 16, 
+                        color: accentColor.withOpacity(0.9),
+                      ),
+                    ],
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: highlightColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Terakhir',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: highlightColor,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Icon(Icons.check_circle_outline, size: 16, color: highlightColor),
+                    ],
+                  ),
+                ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Image.asset(
-        'assets/images/logo.png',
-        width: 28,
-        height: 28,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => const Icon(
-          Icons.cleaning_services,
-          color: primaryColor,
-          size: 22,
-        ),
       ),
     );
   }
