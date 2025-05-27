@@ -1,595 +1,744 @@
 import 'package:flutter/material.dart';
-// Import halaman profil pengguna untuk navigasi dan pengelolaan data profil
-import 'profile_page.dart';
-// Import komponen kustom untuk tampilan navigasi bawah
-import '../custom/custom_navbar.dart';
-// Import komponen kustom untuk menu samping (drawer)
-import '../custom/custom_sidebar.dart';
-// Import halaman detail profil sekolah
-import 'school_profile_page.dart';
-// Import widget setup akun
-import '../widgets/account_setup_widget.dart';
-// Import widget setup sekolah
-import '../widgets/school_setup_widget.dart';
+import 'dart:async';
 
-// Import Service dan Widget Notifikasi
-import '../services/notification_service.dart';
-import '../widgets/notification_widget.dart';
+// Import semua file yang sudah dipisah
+import '../widgets/app_theme.dart';
+import 'beranda/data_models.dart';
+import 'beranda/quick_access_data.dart';
+import 'beranda/shared_widgets.dart';
+import 'beranda/class_management.dart';
+import 'beranda/account_setup_section.dart';
+import 'beranda/user_profile_state.dart'; // TAMBAHKAN IMPORT INI
 
+// Main Landing Page
 class LandingPage extends StatefulWidget {
-  const LandingPage({super.key});
+  const LandingPage({Key? key}) : super(key: key);
 
   @override
-  State<LandingPage> createState() => _LandingPageState();
+  _LandingPageState createState() => _LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage> {
-  // Indeks untuk navigasi antar halaman
-  int _selectedIndex = 0;
+class _LandingPageState extends State<LandingPage> with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+  
+  // TAMBAHKAN DEKLARASI INI
+  final UserProfileState _profileState = UserProfileState();
 
-  // Data profil pengguna yang akan diupdate dari ProfilePage
-  String _nama = '';
-  String _email = '';
-  bool _isProfileComplete = false;
-  
-  // Data sekolah yang telah ditambahkan
-  final List<Map<String, dynamic>> _schools = [];
-  
-  // Jumlah notifikasi yang belum dibaca
-  int _unreadNotifications = 0;
-  
   @override
   void initState() {
     super.initState();
-    // Cek apakah profil pengguna sudah lengkap
-    _checkProfileCompletion();
-    
-    // Inisialisasi layanan notifikasi
-    _initializeNotificationService();
-  }
-  
-  void _initializeNotificationService() {
-    // Inisialisasi notifikasi service
-    NotificationService.instance.init();
-    
-    // Berlangganan perubahan jumlah notifikasi
-    NotificationService.instance.notificationStream.listen((count) {
-      setState(() {
-        _unreadNotifications = count;
-      });
-    });
-    
-    // Dapatkan jumlah notifikasi saat ini
-    _unreadNotifications = NotificationService.instance.unreadCount;
+    _initializeAnimations();
+    _initializeProfile(); // PANGGIL METHOD INI
   }
 
-  // Fungsi untuk memeriksa kelengkapan profil pengguna
-  void _checkProfileCompletion() {
-    setState(() {
-      _isProfileComplete = ProfileCompletenessHelper.isProfileComplete(_nama, _email);
-    });
+  void _initializeAnimations() {
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeController.forward();
+    _slideController.forward();
   }
 
-  // Fungsi yang dipanggil oleh CustomBottomNavBar untuk perpindahan halaman
-  void _onItemTapped(int index) {
-    // Make sure index is within valid range
-    if (index >= 0 && index < _pages.length) {
-      setState(() => _selectedIndex = index);
+  // Initialize profile state when landing page loads
+  Future<void> _initializeProfile() async {
+    await _profileState.loadProfileStatus();
+    if (mounted) {
+      setState(() {}); // Refresh UI setelah load profile
     }
   }
 
-  // Fungsi yang dipanggil oleh ProfilePage ketika profil diperbarui
-  void _updateProfile(String nama, String email) {
-    setState(() {
-      _nama = nama;
-      _email = email;
-      _checkProfileCompletion();
-    });
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
   }
-
-  // Navigasi ke halaman profil dengan membawa data profil saat ini
-  // dan callback untuk update profil
-  void _navigateToProfilePage() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfilePage(
-          initialNama: _nama,
-          initialEmail: _email,
-          onProfileUpdated: _updateProfile, // Callback untuk update profil
-        ),
-      ),
-    );
-    
-    // Jika result berisi index, update _selectedIndex
-    if (result != null && result is int) {
-      setState(() {
-        _selectedIndex = result;
-      });
-    }
-  }
-
-  // Navigasi ke halaman profil sekolah dengan membawa data sekolah dan profil pengguna
-  void _navigateToSchoolProfilePage(Map<String, dynamic> school) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SchoolProfilePage(
-          school: school,
-          nama: _nama,
-          email: _email,
-        ),
-      ),
-    );
-    
-    // Jika result berisi index, update _selectedIndex
-    if (result != null && result is int) {
-      setState(() {
-        _selectedIndex = result;
-      });
-    }
-  }
-
-  // Fungsi untuk menampilkan panel notifikasi
-  void _showNotificationPanel() {
-    NotificationService.instance.showNotificationPanel(context);
-  }
-
-  void _addSchool(String name, String address) {
-    setState(() {
-      _schools.add({
-        'name': name,
-        'address': address,
-        'id': DateTime.now().millisecondsSinceEpoch.toString(),
-        'joinCode': _generateJoinCode(),
-        'members': 1,
-      });
-      
-      // Tambahkan notifikasi saat sekolah berhasil ditambahkan
-      NotificationService.instance.addNotification(
-        title: 'Sekolah Ditambahkan',
-        message: 'Sekolah $name berhasil ditambahkan ke daftar sekolah Anda.',
-        type: NotificationType.info,
-      );
-    });
-  }
-  
-  // Bergabung dengan sekolah menggunakan kode
-  void _joinSchoolWithCode(String joinCode) {
-    bool foundSchool = false;
-    String schoolName = '';
-    
-    setState(() {
-      for (var school in _schools) {
-        if (school['joinCode'] == joinCode) {
-          school['members'] = (school['members'] ?? 0) + 1;
-          foundSchool = true;
-          schoolName = school['name'];
-          break;
-        }
-      }
-    });
-    
-    if (foundSchool) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Berhasil bergabung dengan sekolah!')),
-      );
-      
-      // Tambahkan notifikasi saat berhasil bergabung dengan sekolah
-      NotificationService.instance.addNotification(
-        title: 'Bergabung dengan Sekolah',
-        message: 'Anda berhasil bergabung dengan sekolah $schoolName.',
-        type: NotificationType.welcome,
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kode join tidak valid. Silakan coba lagi.')),
-      );
-    }
-  }
-  
-  // Generate kode join acak untuk sekolah
-  String _generateJoinCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = DateTime.now().millisecondsSinceEpoch % 1000000;
-    String result = '';
-    
-    for (var i = 0; i < 6; i++) {
-      result += chars[(rnd + i) % chars.length];
-    }
-    
-    return result;
-  }
-
-  void _showAddSchoolDialog() {
-    SchoolDialogHelper.showAddSchoolDialog(context, _addSchool);
-  }
-
-  void _showJoinWithCodeDialog() {
-    SchoolDialogHelper.showJoinWithCodeDialog(context, _joinSchoolWithCode);
-  }
-
-  Widget _buildSchoolCard(Map<String, dynamic> school) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: InkWell(
-        onTap: () => _navigateToSchoolProfilePage(school),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6E7E40).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.school, color: Color(0xFF6E7E40)),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          school['name'],
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          school['address'],
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.people, size: 16, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${school['members']} anggota',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        'Kode Join:',
-                        style: TextStyle(fontSize: 10, color: Colors.grey),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // Copy to clipboard
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Kode ${school['joinCode']} disalin ke clipboard')),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF6E7E40).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                school['joinCode'],
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1,
-                                  color: Color(0xFF6E7E40),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.copy, size: 12, color: Color(0xFF6E7E40)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSchoolsList() {
-    if (_schools.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.school, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Belum ada sekolah',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tambahkan sekolah baru atau bergabung dengan kode',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
-    }
-    
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: _schools.length,
-      itemBuilder: (context, index) {
-        return _buildSchoolCard(_schools[index]);
-      },
-    );
-  }
-
-  // Widget untuk halaman beranda, tab pertama pada bottom navigation
-  Widget _buildBeranda() {
-    // Menghitung kelengkapan profil
-    final double profileCompleteness = ProfileCompletenessHelper.calculateProfileCompleteness(_nama, _email);
-    
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        // Welcome card at the top
-        Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Color(0xFF6E7E40),
-                      child: Icon(Icons.person, color: Colors.white, size: 28),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Selamat datang${_nama.isNotEmpty ? ', $_nama' : ''}!',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Semangat belajar hari ini',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Account Setup Alert - Menggunakan widget dari file terpisah
-        AccountSetupWidget(
-          nama: _nama,
-          email: _email,
-          isProfileComplete: _isProfileComplete,
-          profileCompleteness: profileCompleteness,
-          onNavigateToProfile: _navigateToProfilePage,
-        ),
-        
-        // School Setup Alert - Menggunakan widget dari file terpisah
-        SchoolSetupWidget(
-          onAddSchool: _showAddSchoolDialog,
-          onJoinWithCode: _showJoinWithCodeDialog,
-        ),
-        
-        // Complete Profile Button (if profile is incomplete) - Menggunakan widget dari file terpisah
-        if (!_isProfileComplete)
-          CompleteProfileButton(
-            onNavigateToProfile: _navigateToProfilePage,
-          ),
-        
-        const SizedBox(height: 16),
-        
-        // Schools List Section
-        const Text(
-          'Sekolah Saya',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF6E7E40)),
-        ),
-        const SizedBox(height: 8),
-        _buildSchoolsList(),
-        
-        const SizedBox(height: 24),
-      ],
-    );
-  }
-
-  // Widget untuk tab profil pada bottom navigation
-  Widget _buildProfil() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircleAvatar(
-            radius: 60,
-            backgroundColor: Color(0xFF6E7E40),
-            child: Icon(Icons.person, color: Colors.white, size: 60),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            _nama.isNotEmpty ? _nama : 'Pengguna Baru',
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (_email.isNotEmpty)
-            Text(
-              _email,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.edit),
-            label: const Text('Kelola Profil'),
-            onPressed: _navigateToProfilePage,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6E7E40),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Widget untuk tab pengaturan pada bottom navigation
-  Widget _buildPengaturan() {
-    return const Center(child: Text('Pengaturan', style: TextStyle(fontSize: 24)));
-  }
-
-  // Daftar halaman yang tersedia dalam aplikasi untuk navigasi bottom bar
-  // PENTING: Jumlah item harus sesuai dengan jumlah item di bottom navigation bar
-  List<Widget> get _pages => <Widget>[
-    _buildBeranda(),
-    _buildProfil(),
-    _buildPengaturan(),
-    const Center(child: Text('Tentang', style: TextStyle(fontSize: 24))), // Halaman baru untuk tab 'Tentang'
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // Hapus title KridaSehat
-        backgroundColor: const Color(0xFF6E7E40),
-        foregroundColor: Colors.white,
-        leadingWidth: 24, // Kurangi lebar leading untuk space yang lebih baik
-        // Pindahkan profil ke title (bagian utama) bukan di actions
-        title: InkWell(
-          onTap: _navigateToProfilePage,
-          child: Row(
-            children: [
-              const CircleAvatar(
-                radius: 18,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: Color(0xFF6E7E40), size: 20),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Column(
+                  children: const [
+                    SizedBox(height: 0),
+                    AnnouncementSection(),
+                    AccountSetupSection(),
+                    ClassAccessSection(),
+                    FeaturesSection(),
+                    // TestimonialsSection(),
+                    LiveActivitySection(),
+                    SizedBox(height: 20),
+                  ],
+                ),
               ),
-              const SizedBox(width: 12),
-              Column(
+            ),
+          ),
+          const AboutAppNotification(),
+        ],
+      ),
+    );
+  }
+}
+
+// About App Notification (Auto-hide)
+class AboutAppNotification extends StatefulWidget {
+  const AboutAppNotification({Key? key}) : super(key: key);
+
+  @override
+  _AboutAppNotificationState createState() => _AboutAppNotificationState();
+}
+
+class _AboutAppNotificationState extends State<AboutAppNotification>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+  bool _isVisible = true;
+  Timer? _autoHideTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimation();
+    _startAutoHideTimer();
+  }
+
+  void _initializeAnimation() {
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<double>(
+      begin: -100.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) _animationController.forward();
+    });
+  }
+
+  void _startAutoHideTimer() {
+    _autoHideTimer = Timer(const Duration(seconds: 5), _hideNotification);
+  }
+
+  void _hideNotification() {
+    if (mounted) {
+      _animationController.reverse().then((_) {
+        if (mounted) {
+          setState(() {
+            _isVisible = false;
+          });
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _autoHideTimer?.cancel();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isVisible) return const SizedBox.shrink();
+
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 10,
+      left: 16,
+      right: 16,
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, _slideAnimation.value),
+            child: Opacity(
+              opacity: _fadeAnimation.value,
+              child: _buildNotificationCard(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNotificationCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryColor.withOpacity(0.95),
+            AppTheme.secondaryColor.withOpacity(0.95),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.3),
+            spreadRadius: 0,
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.info_outline, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Selamat datang di KridaSehat! 👋',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Solusi digital untuk mengelola jadwal piket sekolah',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: _hideNotification,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              child: Icon(
+                Icons.close,
+                color: Colors.white.withOpacity(0.8),
+                size: 18,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Announcement Section
+class AnnouncementSection extends StatefulWidget {
+  const AnnouncementSection({Key? key}) : super(key: key);
+
+  @override
+  _AnnouncementSectionState createState() => _AnnouncementSectionState();
+}
+
+class _AnnouncementSectionState extends State<AnnouncementSection>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _blinkController;
+
+  @override
+  void initState() {
+    super.initState();
+    _blinkController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _blinkController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _blinkController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: const Column(
+        children: [
+          SizedBox(height: 8),
+          // You can add info banner here if needed
+        ],
+      ),
+    );
+  }
+}
+
+// Class Access Section
+class ClassAccessSection extends StatelessWidget {
+  const ClassAccessSection({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionTitle(title: 'Akses Kelas'),
+          const SizedBox(height: 4),
+          const Text(
+            'Pilih kelas untuk melihat jadwal piket dan aktivitas',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildClassAccessCard(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClassAccessCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _navigateToClassSelection(context),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryColor.withOpacity(0.3),
+              spreadRadius: 0,
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.school, color: Colors.white, size: 32),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _nama.isNotEmpty ? _nama : 'Pengguna',
-                    style: const TextStyle(
-                      fontSize: 16,
+                  const Text(
+                    'Masuk ke Kelas',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
-                    _email.isNotEmpty ? _email : 'Selamat datang',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
+                    'Akses jadwal piket dan kelola aktivitas kelas Anda',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 14,
                     ),
-                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Pilih Kelas',
+                          style: TextStyle(
+                            color: AppTheme.primaryColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: AppTheme.primaryColor,
+                          size: 16,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        actions: [
-          // Tombol notifikasi dengan badge
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Stack(
-              alignment: Alignment.center,
+      ),
+    );
+  }
+
+  void _navigateToClassSelection(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ClassSelectionPage()),
+    );
+  }
+}
+
+// Features Section
+class FeaturesSection extends StatelessWidget {
+  const FeaturesSection({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionTitle(title: 'Fitur Unggulan'),
+          const SizedBox(height: 16),
+          ...QuickAccessData.features.map((feature) => _buildFeatureItem(feature)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(FeatureItem feature) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.textPrimary.withOpacity(0.08),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(feature.icon, color: AppTheme.primaryColor, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_outlined, size: 26),
-                  onPressed: _showNotificationPanel,
-                ),
-                if (_unreadNotifications > 0)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: NotificationBadge(count: _unreadNotifications),
+                Text(
+                  feature.title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
                   ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  feature.description,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
         ],
       ),
-      // Menggunakan CustomSidebar dari file custom_sidebar.dart
-      drawer: CustomSidebar(
-        nama: _nama, // Mengirim data nama ke sidebar
-        email: _email, // Mengirim data email ke sidebar
-        selectedIndex: _selectedIndex, // Mengirim indeks halaman aktif
-        onItemSelected: _onItemTapped, // Callback untuk navigasi
-        onProfileUpdate: _navigateToProfilePage, // Callback untuk update profil
+    );
+  }
+}
+
+// Testimonials Section
+class TestimonialsSection extends StatefulWidget {
+  const TestimonialsSection({Key? key}) : super(key: key);
+
+  @override
+  _TestimonialsSectionState createState() => _TestimonialsSectionState();
+}
+
+class _TestimonialsSectionState extends State<TestimonialsSection> {
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoSlide();
+  }
+
+  void _startAutoSlide() {
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (_currentIndex < QuickAccessData.testimonials.length - 1) {
+        _currentIndex++;
+      } else {
+        _currentIndex = 0;
+      }
+
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentIndex,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionTitle(title: 'Kata Mereka'),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 180,
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              itemCount: QuickAccessData.testimonials.length,
+              itemBuilder: (context, index) {
+                return TestimonialCard(data: QuickAccessData.testimonials[index]);
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildPageIndicator(),
+        ],
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
+    );
+  }
+
+  Widget _buildPageIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(
+        QuickAccessData.testimonials.length,
+        (index) => Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: _currentIndex == index ? 20 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: _currentIndex == index
+                ? AppTheme.primaryColor
+                : AppTheme.textTertiary,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
       ),
-      // Menggunakan CustomBottomNavBar dari file custom_navbar.dart
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _selectedIndex, // Indeks tab yang aktif
-        onTap: _onItemTapped, // Callback untuk perpindahan tab
-        selectedItemColor: const Color(0xFF6E7E40), // Warna tab yang aktif
-        // Data yang diperlukan untuk komponen CustomBottomNavBar
-        nama: _nama,
-        email: _email,
-        onProfileUpdated: _updateProfile, // Callback untuk update profil dari CustomBottomNavBar
+    );
+  }
+}
+
+// Live Activity Section
+class LiveActivitySection extends StatelessWidget {
+  const LiveActivitySection({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SectionTitle(title: 'Aktivitas Live'),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Live',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.textPrimary.withOpacity(0.08),
+                  spreadRadius: 0,
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: QuickAccessData.activities
+                  .map((activity) => _buildActivityItem(activity))
+                  .toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivityItem(ActivityData activity) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.textTertiary.withOpacity(0.3),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: activity.isActive ? AppTheme.primaryColor : AppTheme.textTertiary,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  activity.className,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                Text(
+                  activity.activity,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            activity.timestamp,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppTheme.textTertiary,
+            ),
+          ),
+        ],
       ),
     );
   }

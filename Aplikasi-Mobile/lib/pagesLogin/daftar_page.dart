@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+// Import AppLogo widget
+import 'package:kridasehat/logobar/app_logo.dart';
+import '../widgets/app_theme.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -49,7 +52,6 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
   };
 
   // Design colors matching login page
-  static const Color primaryColor = Color(0xFF6E7E40);
   static const Color buttonColor = Color(0xFFFC7F07);
   static const Color buttonSecondaryColor = Color(0xFFFD9C3B);
   static const Color textPrimaryColor = Color(0xFF333333);
@@ -309,6 +311,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
     // Check if animations are ready
     if (_animationController == null) {
       return const Scaffold(
+        backgroundColor: Colors.white, // Background putih untuk loading
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -324,20 +327,10 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
     final double betweenFieldsPadding = isKeyboardVisible ? 6 : 12;
     
     return Scaffold(
+      backgroundColor: Colors.white, // Background putih untuk Scaffold
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              const Color(0xFFF8F9F2),
-              const Color(0xFFF1F4E8),
-              primaryColor.withOpacity(0.1),
-            ],
-            stops: const [0.0, 0.4, 0.8, 1.0],
-          ),
-        ),
+        // Mengganti gradient dengan warna putih solid
+        color: Colors.white,
         child: SafeArea(
           child: Column(
             children: [
@@ -379,19 +372,11 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      color: Colors.white, // Background putih untuk header
       child: Row(
         children: [
-          _buildLogo(),
-          const SizedBox(width: 10),
-          const Text(
-            'KridaSehat',
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: primaryColor,
-            ),
-          ),
+          // Menggunakan AppLogo widget yang konsisten
+          const AppLogo(),
           const Spacer(),
           Container(
             decoration: BoxDecoration(
@@ -399,14 +384,14 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withAlpha(13),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: primaryColor),
+              icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -414,37 +399,6 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Hero(
-        tag: 'app_logo',
-        child: Image.asset(
-          'assets/images/logo.png',
-          width: 32,
-          height: 32,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => const Icon(
-            Icons.rocket_launch,
-            color: primaryColor,
-            size: 24,
-          ),
-        ),
       ),
     );
   }
@@ -465,7 +419,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
         SizedBox(height: topPadding),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-            colors: [textPrimaryColor, primaryColor],
+            colors: [textPrimaryColor, AppTheme.primaryColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ).createShader(bounds),
@@ -706,7 +660,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.08),
+            color: AppTheme.primaryColor.withAlpha(20),
             blurRadius: 10,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -732,7 +686,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
                    labelText == 'Email' ? 'Contoh: anda@email.com' : 
                    'Minimal 3 karakter',
           hintStyle: TextStyle(
-            color: textSecondaryColor.withOpacity(0.5),
+            color: textSecondaryColor.withAlpha(128),
             fontFamily: 'Sora',
             fontSize: 12,
           ),
@@ -742,7 +696,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
                 ? errorColor 
                 : isValid 
                     ? successColor 
-                    : primaryColor,
+                    : AppTheme.primaryColor,
           ),
           suffixIcon: isPassword
               ? Row(
@@ -763,7 +717,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
                     IconButton(
                       icon: Icon(
                         _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                        color: primaryColor,
+                        color: AppTheme.primaryColor,
                         size: 22,
                       ),
                       onPressed: _togglePasswordVisibility,
@@ -786,7 +740,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
                   ? errorColor 
                   : isValid 
                       ? successColor 
-                      : primaryColor,
+                      : AppTheme.primaryColor,
               width: 1.0,
             ),
           ),
@@ -797,7 +751,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
                   ? errorColor 
                   : isValid 
                       ? successColor 
-                      : primaryColor,
+                      : AppTheme.primaryColor,
               width: 2.0,
             ),
           ),
@@ -848,7 +802,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: buttonColor.withOpacity(0.4),
+            color: buttonColor.withAlpha(102),
             blurRadius: 12,
             spreadRadius: 0,
             offset: const Offset(0, 6),
@@ -859,7 +813,7 @@ class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderSt
         color: Colors.transparent,
         child: InkWell(
           onTap: _isLoading ? null : _register,
-          splashColor: Colors.white.withOpacity(0.2),
+          splashColor: Colors.white.withAlpha(51),
           borderRadius: BorderRadius.circular(30),
           child: Center(
             child: _isLoading

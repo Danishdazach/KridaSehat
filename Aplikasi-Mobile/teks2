@@ -1,0 +1,95 @@
+navigasi switch
+import 'package:flutter/material.dart';
+import 'landing_page.dart';
+import 'profile_page.dart';
+
+class NavigasiPage extends StatefulWidget {
+  const NavigasiPage({Key? key}) : super(key: key);
+
+  @override
+  State<NavigasiPage> createState() => _NavigasiPageState();
+}
+
+class _NavigasiPageState extends State<NavigasiPage> {
+  int _selectedIndex = 0;
+  
+  // Tambahkan state untuk menyimpan nama dan email
+  String _nama = '';
+  String _email = '';
+
+  // Pre-initialize pages for better performance
+  late final List<Widget> _pages;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize pages once during startup
+    _pages = [
+      const LandingPage(),
+      ProfilePage(
+        initialNama: _nama,
+        initialEmail: _email,
+        onProfileUpdated: _updateProfile,
+      ),
+      const LandingPage(), // Placeholder for Settings
+      const LandingPage(), // Placeholder for Contact
+    ];
+  }
+
+  // Fungsi untuk mengupdate profil
+  void _updateProfile(String newNama, String newEmail) {
+    setState(() {
+      _nama = newNama;
+      _email = newEmail;
+      
+      // Update ProfilePage with new data
+      _pages[1] = ProfilePage(
+        initialNama: _nama,
+        initialEmail: _email,
+        onProfileUpdated: _updateProfile,
+      );
+    });
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Use IndexedStack to maintain state of all pages
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Pengaturan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.contact_phone),
+            label: 'Kontak',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: const Color(0xFF6E7E40), // Sesuaikan dengan warna di ProfilePage
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+      ),
+    );
+  }
+}

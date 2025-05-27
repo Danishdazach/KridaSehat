@@ -3,6 +3,8 @@ import 'package:kridasehat/pagesLogin/daftar_page.dart';
 import 'package:kridasehat/pagesLogin/lupa_password_page.dart';
 // Import AppLogo widget
 import 'package:kridasehat/logobar/app_logo.dart';
+import '../widgets/app_theme.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -32,7 +34,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   bool _isLoading = false;
 
   // Updated design colors
-  static const Color primaryColor = Color(0xFF6E7E40);
   static const Color buttonColor = Color(0xFFFC7F07);
   static const Color buttonSecondaryColor = Color(0xFFFD9C3B);
   static const Color textPrimaryColor = Color(0xFF333333);
@@ -154,9 +155,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       String password = passwordController.text;
 
       // Check for admin login
-      if (username == 'admin' && password == '1234') {
+      if (username == 'Danish' && password == '1234') {
         if (!mounted) return;
-        Navigator.pushReplacementNamed(context, '/landing', arguments: {
+        Navigator.pushReplacementNamed(context, '/navigasi', arguments: {
           'userType': 'admin',
           'username': username,
         });
@@ -292,6 +293,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     // Fix: Check if animations are ready
     if (_animationController == null) {
       return const Scaffold(
+        backgroundColor: Colors.white, // Background putih untuk loading
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -308,20 +310,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     final double betweenFieldsPadding = isKeyboardVisible ? 8 : 16;
     
     return Scaffold(
+      backgroundColor: Colors.white, // Background putih untuk Scaffold
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              const Color(0xFFF8F9F2),
-              const Color(0xFFF1F4E8),
-              primaryColor.withOpacity(0.1),
-            ],
-            stops: const [0.0, 0.4, 0.8, 1.0],
-          ),
-        ),
+        // Mengganti gradient dengan warna putih solid
+        color: Colors.white,
         child: SafeArea(
           child: Column(
             children: [
@@ -364,6 +356,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      color: Colors.white, // Background putih untuk header
       child: Row(
         children: [
           // Menggunakan AppLogo widget baru yang konsisten
@@ -375,14 +368,14 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withAlpha(13),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: primaryColor),
+              icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
               onPressed: () {
                 Navigator.pushReplacementNamed(context, '/boarding');
               },
@@ -420,27 +413,27 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: primaryColor.withOpacity(0.15),
+                    color: AppTheme.primaryColor.withAlpha(38),
                     blurRadius: 20,
                     spreadRadius: 5,
                     offset: const Offset(0, 10),
                   ),
                 ],
                 border: Border.all(
-                  color: primaryColor.withOpacity(0.3),
+                  color: AppTheme.primaryColor.withAlpha(77),
                   width: 2,
                 ),
               ),
               child: Icon(
                 Icons.person_outline,
                 size: logoSize * 0.6,
-                color: primaryColor,
+                color: AppTheme.primaryColor,
               ),
             ),
           ),
         ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-            colors: [textPrimaryColor, primaryColor],
+            colors: [textPrimaryColor, AppTheme.primaryColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ).createShader(bounds),
@@ -644,7 +637,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.08),
+            color: AppTheme.primaryColor.withAlpha(20),
             blurRadius: 10,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -667,7 +660,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           ),
           hintText: isPassword ? 'Minimal 4 karakter' : 'Minimal 3 karakter',
           hintStyle: TextStyle(
-            color: textSecondaryColor.withOpacity(0.5),
+            color: textSecondaryColor.withAlpha(128),
             fontFamily: 'Sora',
             fontSize: 12,
           ),
@@ -677,7 +670,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                 ? errorColor 
                 : isValid 
                     ? successColor 
-                    : primaryColor,
+                    : AppTheme.primaryColor,
           ),
           suffixIcon: isPassword
               ? Row(
@@ -698,7 +691,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     IconButton(
                       icon: Icon(
                         _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                        color: primaryColor,
+                        color: AppTheme.primaryColor,
                         size: 22,
                       ),
                       onPressed: _togglePasswordVisibility,
@@ -721,7 +714,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   ? errorColor 
                   : isValid 
                       ? successColor 
-                      : primaryColor,
+                      : AppTheme.primaryColor,
               width: 1.0,
             ),
           ),
@@ -732,7 +725,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   ? errorColor 
                   : isValid 
                       ? successColor 
-                      : primaryColor,
+                      : AppTheme.primaryColor,
               width: 2.0,
             ),
           ),
@@ -785,7 +778,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: buttonColor.withOpacity(0.4),
+            color: buttonColor.withAlpha(102),
             blurRadius: 12,
             spreadRadius: 0,
             offset: const Offset(0, 6),
@@ -796,7 +789,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         color: Colors.transparent,
         child: InkWell(
           onTap: _isLoading ? null : _login,
-          splashColor: Colors.white.withOpacity(0.2),
+          splashColor: Colors.white.withAlpha(51),
           borderRadius: BorderRadius.circular(30),
           child: Center(
             child: _isLoading

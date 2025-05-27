@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_theme.dart';
 
 class AppLogo extends StatelessWidget {
   final double size;
@@ -6,16 +7,14 @@ class AppLogo extends StatelessWidget {
   final Color? textColor;
 
   const AppLogo({
-    Key? key,
+    super.key,
     this.size = 42.0,
     this.showText = true,
     this.textColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Define standard colors (same as in your onboarding screen)
-    const Color primaryColor = Color(0xFF5C8D3E);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -29,7 +28,7 @@ class AppLogo extends StatelessWidget {
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => Icon(
               Icons.cleaning_services,
-              color: primaryColor,
+              color: AppTheme.primaryColor,
               size: size * 0.52, // Proportional to the container size
             ),
           ),
@@ -42,7 +41,7 @@ class AppLogo extends StatelessWidget {
               fontFamily: 'Sora',
               fontWeight: FontWeight.bold,
               fontSize: size * 0.43, // Proportional to logo size
-              color: textColor ?? primaryColor,
+              color: textColor ?? AppTheme.primaryColor,
               letterSpacing: 0.5,
             ),
           ),

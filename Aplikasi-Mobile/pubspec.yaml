@@ -30,8 +30,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image_picker: ^0.8.6
+  image_picker: ^1.0.4
   cupertino_icons: ^1.0.8
+  flutter_vector_icons: ^2.0.0
+  shared_preferences: ^2.2.2  # atau versi terbaru
+  intl: ^0.18.1  # atau versi terbaru yang tersedia
 
 
 dev_dependencies:
@@ -51,7 +54,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo.png" # ganti sesuai lokasi dan nama ikonmu
+  image_path: "assets/images/Frame.png" # ganti sesuai lokasi dan nama ikonmu
 # The following section is specific to Flutter packages.
 flutter:
 

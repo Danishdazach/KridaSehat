@@ -7,6 +7,7 @@ import 'pagesLogin/login_page.dart';
 import 'pagesLogin/lupa_password_page.dart';
 import 'splashScreen/onboarding_screen.dart';
 import 'screens/landing_page.dart';
+import 'screens/navigasi.dart';
 
 // Import notifikasi
 import 'services/notification_service.dart';
@@ -14,13 +15,13 @@ import 'widgets/notification_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   // Lock orientasi ke portrait
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
+  
   runApp(const MyApp());
 }
 
@@ -32,17 +33,20 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final NotificationService _notificationService = NotificationService.instance;
+  // Menggunakan singleton instance dari NotificationService
+  final NotificationService _notificationService = NotificationService();
 
   @override
   void initState() {
     super.initState();
-    _notificationService.init();
+    // NotificationService sudah diinisialisasi sebagai singleton
+    // Tidak perlu memanggil init() karena sudah ada initializeSampleData()
   }
 
   @override
   void dispose() {
-    _notificationService.dispose();
+    // Untuk singleton service, biasanya tidak perlu dispose
+    // kecuali ada listener atau resource yang perlu dibersihkan
     super.dispose();
   }
 
@@ -76,7 +80,8 @@ class _MyAppState extends State<MyApp> {
           '/boarding': (context) => const OnboardingScreen(),
           '/login': (context) => const LoginPage(),
           '/forgot-password': (context) => const ForgotPasswordPage(),
-          '/landing': (context) => const LandingPage(),
+          '/landing': (context) => LandingPage(),
+          '/navigasi': (context) => const NavigasiPage(),
         },
       ),
     );

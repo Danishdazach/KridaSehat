@@ -15,14 +15,14 @@ class SplashScreen extends StatefulWidget {
 
   const SplashScreen({
     super.key,
-    this.logoAsset = 'assets/images/logo.png',
+    this.logoAsset =  'assets/images/logo.png',
     this.appName = 'KridaSehat',
     this.createdBy = 'Dazach',
     this.primaryColor = const Color(0xFF6E7E40),
     this.textColor = const Color(0xFF6E7E40),
     this.animationDuration = const Duration(milliseconds: 3000),
     this.splashDuration = const Duration(seconds: 5),
-    this.nextRoute = '/boarding',
+    this.nextRoute = '/login',
     this.logoSize = 150,
     this.appVersion = 'v1.0.0',
   });
@@ -126,7 +126,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.white,
-                  Color.lerp(Colors.white, widget.primaryColor.withOpacity(0.2), _backgroundAnimation.value)!,
+                  Color.lerp(Colors.white, widget.primaryColor.withAlpha(51), _backgroundAnimation.value)!,
                 ],
               ),
             ),
@@ -144,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: widget.primaryColor.withOpacity(0.2),
+                          color: widget.primaryColor.withAlpha(51),
                         ),
                       ),
                     ),
@@ -162,7 +162,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         height: 250,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: widget.primaryColor.withOpacity(0.3),
+                          color: widget.primaryColor.withAlpha(77),
                         ),
                       ),
                     ),
@@ -217,7 +217,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   letterSpacing: 1.5,
                                   shadows: [
                                     Shadow(
-                                      color: widget.primaryColor.withOpacity(0.3),
+                                      color: widget.primaryColor.withAlpha(77),
                                       blurRadius: 3,
                                       offset: const Offset(1, 1),
                                     ),
@@ -237,10 +237,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
-                                color: widget.primaryColor.withOpacity(0.1),
+                                color: widget.primaryColor.withAlpha(026),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: widget.primaryColor.withOpacity(0.2),
+                                  color: widget.primaryColor.withAlpha(51),
                                   width: 1,
                                 ),
                               ),
@@ -250,7 +250,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   fontSize: 12,
                                   fontFamily: 'Sora',
                                   fontWeight: FontWeight.w500,
-                                  color: widget.textColor.withOpacity(0.7),
+                                  color: widget.textColor.withAlpha(179),
                                 ),
                               ),
                             ),
@@ -274,7 +274,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontFamily: 'Sora',
-                                        color: widget.textColor.withOpacity(0.6),
+                                        color: widget.textColor.withAlpha(152),
                                       ),
                                     ),
                                     const SizedBox(height: 4),
@@ -284,7 +284,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         fontFamily: 'Sora',
-                                        color: widget.textColor.withOpacity(0.8),
+                                        color: widget.textColor.withAlpha(204),
                                         letterSpacing: 0.5,
                                       ),
                                     ),

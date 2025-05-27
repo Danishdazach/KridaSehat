@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+// Import AppLogo widget
+import 'package:kridasehat/logobar/app_logo.dart';
+import '../widgets/app_theme.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -13,10 +16,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
   bool _isLoading = false;
   
   // Animation controllers
-  AnimationController? _animationController;
-  Animation<double>? _fadeAnimation;
-  Animation<double>? _slideAnimation;
-  Animation<double>? _scaleAnimation;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _scaleAnimation;
   
   // Username validation state
   bool _usernameHasError = false;
@@ -24,7 +27,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
   String _usernameErrorText = '';
 
   // Design colors (matched with LoginPage)
-  static const Color primaryColor = Color(0xFF6E7E40);
   static const Color buttonColor = Color(0xFFFC7F07);
   static const Color buttonSecondaryColor = Color(0xFFFD9C3B);
   static const Color textPrimaryColor = Color(0xFF333333);
@@ -37,29 +39,25 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
     super.initState();
     
     // Initialize animation controller
-    try {
-      _animationController = AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 800),
-      );
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
 
-      _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _animationController!, curve: Curves.easeIn),
-      );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
 
-      _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
-        CurvedAnimation(parent: _animationController!, curve: Curves.easeOutQuad),
-      );
+    _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad),
+    );
 
-      _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-        CurvedAnimation(parent: _animationController!, curve: Curves.easeOutBack),
-      );
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
 
-      _animationController!.forward();
-    } catch (e) {
-      // Handle initialization error
-      debugPrint('Animation controller initialization error: $e');
-    }
+    // Start animations
+    _animationController.forward();
     
     // Add listener to controller for real-time validation
     usernameController.addListener(_validateUsername);
@@ -69,7 +67,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
   void dispose() {
     usernameController.removeListener(_validateUsername);
     usernameController.dispose();
-    _animationController?.dispose();
+    _animationController.dispose();
     super.dispose();
   }
   
@@ -78,14 +76,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
     if (!mounted) return;
     
     setState(() {
-      if (usernameController.text.isEmpty) {
+      final username = usernameController.text.trim();
+      if (username.isEmpty) {
         _usernameHasError = true;
         _usernameIsValid = false;
         _usernameErrorText = 'Username tidak boleh kosong';
-      } else if (usernameController.text.length < 3) {
+      } else if (username.length < 3) {
         _usernameHasError = true;
         _usernameIsValid = false;
         _usernameErrorText = 'Username minimal 3 karakter';
+      } else if (username.length > 50) {
+        _usernameHasError = true;
+        _usernameIsValid = false;
+        _usernameErrorText = 'Username maksimal 50 karakter';
+      } else if (!RegExp(r'^[a-zA-Z0-9._-]+$').hasMatch(username)) {
+        _usernameHasError = true;
+        _usernameIsValid = false;
+        _usernameErrorText = 'Username hanya boleh mengandung huruf, angka, titik, underscore, dan dash';
       } else {
         _usernameHasError = false;
         _usernameIsValid = true;
@@ -94,67 +101,104 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
     });
   }
 
-  void _resetPassword() async {
+  Future<void> _resetPassword() async {
+    // Validate before proceeding
     _validateUsername();
     
-    if (!_usernameHasError) {
-      FocusScope.of(context).unfocus(); // Tutup keyboard
+    if (_usernameHasError) {
+      return;
+    }
 
-      setState(() {
-        _isLoading = true;
-      });
+    // Close keyboard
+    FocusScope.of(context).unfocus();
 
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
       // Simulate network request
       await Future.delayed(const Duration(seconds: 2));
-      String username = usernameController.text;
-
+      
       if (!mounted) return;
+      
+      final String username = usernameController.text.trim();
+
       setState(() {
         _isLoading = false;
       });
 
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Text(
-                'Link reset password telah dikirim ke $username',
-                style: const TextStyle(fontFamily: 'Sora'),
-              ),
-            ],
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Link reset password telah dikirim ke email yang terdaftar untuk username: $username',
+                    style: const TextStyle(fontFamily: 'Sora'),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: successColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 4),
           ),
-          backgroundColor: successColor,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
+        );
 
-      // Reset field and navigate back after successful reset
-      usernameController.clear();
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted) Navigator.pop(context);
-      });
+        // Reset field and navigate back after successful reset
+        usernameController.clear();
+        
+        // Navigate back after delay
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            Navigator.pop(context);
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Terjadi kesalahan. Silakan coba lagi.',
+                    style: TextStyle(fontFamily: 'Sora'),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Check if animations are ready
-    if (_animationController == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-    
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final isKeyboardVisible = keyboardHeight > 0;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -164,71 +208,25 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
     final double topPadding = isKeyboardVisible ? 10 : screenHeight < 700 ? 20 : 30;
   
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 16, top: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: primaryColor, size: 20),
-            onPressed: () => Navigator.pop(context),
-            tooltip: 'Kembali',
-          ),
-        ),
-        title: Text(
-          'Lupa Password',
-          style: TextStyle(
-            fontFamily: 'Sora', 
-            fontWeight: FontWeight.bold,
-            color: isKeyboardVisible ? primaryColor : Colors.transparent,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      backgroundColor: Colors.white,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              const Color(0xFFF8F9F2),
-              const Color(0xFFF1F4E8),
-              primaryColor.withOpacity(0.1),
-            ],
-            stops: const [0.0, 0.4, 0.8, 1.0],
-          ),
-        ),
+        color: Colors.white,
         child: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 10),
-              _buildHeader(isKeyboardVisible),
+              _buildHeader(),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: AnimatedBuilder(
-                    animation: _animationController!,
+                    animation: _animationController,
                     builder: (context, child) {
                       return FadeTransition(
-                        opacity: _fadeAnimation!,
+                        opacity: _fadeAnimation,
                         child: Transform.translate(
-                          offset: Offset(0, _slideAnimation!.value),
+                          offset: Offset(0, _slideAnimation.value),
                           child: Transform.scale(
-                            scale: _scaleAnimation!.value,
+                            scale: _scaleAnimation.value,
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 24),
                               child: _buildResetForm(
@@ -251,47 +249,30 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
     );
   }
   
-  Widget _buildHeader(bool isKeyboardVisible) {
-    if (isKeyboardVisible) return const SizedBox.shrink();
-    
+  Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      color: Colors.white,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const AppLogo(),
+          const Spacer(),
           Container(
-            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: primaryColor.withOpacity(0.15),
+                  color: Colors.black.withOpacity(0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Image.asset(
-              'assets/images/logo.png',
-              width: 24,
-              height: 24,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.rocket_launch,
-                color: primaryColor,
-                size: 20,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            'KridaSehat',
-            style: TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: primaryColor,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
+              onPressed: () => Navigator.pop(context),
+              tooltip: 'Kembali',
             ),
           ),
         ],
@@ -304,7 +285,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
     required double topPadding,
     required bool isKeyboardVisible,
   }) {
-    // Adjust text size based on keyboard visibility
     final double titleSize = isKeyboardVisible ? 22 : 28;
     final double subtitleSize = isKeyboardVisible ? 13 : 16;
     
@@ -337,21 +317,21 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withOpacity(0.15),
+                        color: AppTheme.primaryColor.withOpacity(0.15),
                         blurRadius: 20,
                         spreadRadius: 5,
                         offset: const Offset(0, 10),
                       ),
                     ],
                     border: Border.all(
-                      color: primaryColor.withOpacity(0.3),
+                      color: AppTheme.primaryColor.withOpacity(0.3),
                       width: 2,
                     ),
                   ),
                   child: Icon(
                     Icons.lock_reset,
-                    size: logoSize * 0.5,
-                    color: primaryColor,
+                    size: logoSize * 0.6,
+                    color: AppTheme.primaryColor,
                   ),
                 ),
               ),
@@ -360,7 +340,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
           // Title with gradient
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
-              colors: [textPrimaryColor, primaryColor],
+              colors: [textPrimaryColor, AppTheme.primaryColor],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ).createShader(bounds),
@@ -477,7 +457,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.08),
+            color: AppTheme.primaryColor.withOpacity(0.08),
             blurRadius: 10,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -508,15 +488,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
                 ? errorColor 
                 : _usernameIsValid 
                     ? successColor 
-                    : primaryColor,
+                    : AppTheme.primaryColor,
           ),
-          suffixIcon: (usernameController.text.isEmpty ? null : (_usernameHasError || _usernameIsValid)
+          suffixIcon: usernameController.text.isNotEmpty && (_usernameHasError || _usernameIsValid)
               ? Icon(
                   _usernameIsValid ? Icons.check_circle : Icons.error,
                   color: _usernameIsValid ? successColor : errorColor,
                   size: 18,
                 )
-              : null),
+              : null,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
@@ -525,7 +505,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
                   ? errorColor 
                   : _usernameIsValid 
                       ? successColor 
-                      : primaryColor,
+                      : AppTheme.primaryColor,
               width: 1.0,
             ),
           ),
@@ -536,7 +516,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
                   ? errorColor 
                   : _usernameIsValid 
                       ? successColor 
-                      : primaryColor,
+                      : AppTheme.primaryColor,
               width: 2.0,
             ),
           ),
@@ -571,6 +551,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with SingleTick
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.done,
         onFieldSubmitted: (_) => _resetPassword(),
+        textCapitalization: TextCapitalization.none,
+        autocorrect: false,
       ),
     );
   }
